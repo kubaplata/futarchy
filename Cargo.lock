@@ -2412,6 +2412,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "totem"
+version = "0.1.0"
+dependencies = [
+ "amm",
+ "anchor-lang",
+ "anchor-spl",
+ "autocrat",
+ "conditional_vault",
+]
+
+[[package]]
 name = "typenum"
 version = "1.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
