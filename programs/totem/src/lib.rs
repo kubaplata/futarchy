@@ -9,7 +9,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("ttmtyv2RyZoWJ1Dvg54XLJJmayFbhJEZzo7WJxMBZy7");
+declare_id!("totAWMiimTLs7yTLAfWtJMmtNKmT5xpU6YM8vAYoqZ5");
 
 #[program]
 pub mod totem {
@@ -29,5 +29,9 @@ pub mod totem {
 
     pub fn settle_dispute(ctx: Context<SettleDispute>, args: SettleDisputeArgs) -> Result<()> {
         instructions::settle_dispute(ctx, args)
+    }
+
+    pub fn update_totem(ctx: Context<UpdateTotem>, args: UpdateTotemArgs) -> Result<()> {
+        instructions::update_totem(ctx, args)
     }
 }

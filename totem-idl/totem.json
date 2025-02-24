@@ -243,7 +243,7 @@
       "accounts": [
         {
           "name": "signer",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
@@ -255,6 +255,12 @@
           "name": "dispute",
           "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "statement",
@@ -272,6 +278,44 @@
           "name": "args",
           "type": {
             "defined": "SettleDisputeArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateTotem",
+      "accounts": [
+        {
+          "name": "signer",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "totem",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "totemDao",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "treasury",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "autocratProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "UpdateTotemArgs"
           }
         }
       ]
@@ -485,6 +529,56 @@
       }
     },
     {
+      "name": "UpdateTotemArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "slotsPerProposal",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "minBaseFutarchicLiquidity",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "minQuoteFutarchicLiquidity",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "passThresholdBps",
+            "type": {
+              "option": "u16"
+            }
+          },
+          {
+            "name": "twapInitialObservation",
+            "type": {
+              "option": "u128"
+            }
+          },
+          {
+            "name": "twapMaxObservationChangePerUpdate",
+            "type": {
+              "option": "u128"
+            }
+          },
+          {
+            "name": "slotsPerChallengePeriod",
+            "type": {
+              "option": "u64"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "Status",
       "type": {
         "kind": "enum",
@@ -535,10 +629,35 @@
       "code": 6005,
       "name": "InvalidCallbackInstructionData",
       "msg": "Callback instruction data is invalid"
+    },
+    {
+      "code": 6006,
+      "name": "ProposalNotFinalised",
+      "msg": "Proposal cannot be settled before finalisation."
+    },
+    {
+      "code": 6007,
+      "name": "DisputeSettled",
+      "msg": "Dispute has been already settled."
+    },
+    {
+      "code": 6008,
+      "name": "InstructionMissingProposal",
+      "msg": "Instruction is missing a proposal account."
+    },
+    {
+      "code": 6009,
+      "name": "ChallengePeriodNotEnded",
+      "msg": "Statement cannot be settled before ending challenge period"
+    },
+    {
+      "code": 6010,
+      "name": "InvalidTreasury",
+      "msg": "Invalid treasury account"
     }
   ],
   "metadata": {
-    "address": "ttmtyv2RyZoWJ1Dvg54XLJJmayFbhJEZzo7WJxMBZy7",
+    "address": "totAWMiimTLs7yTLAfWtJMmtNKmT5xpU6YM8vAYoqZ5",
     "origin": "anchor",
     "binaryVersion": "0.29.0",
     "libVersion": "0.29.0"

@@ -12,3 +12,6 @@ pub use dispute_statement_legacy::*;
 
 pub mod settle_dispute;
 pub use settle_dispute::*;
+
+pub mod update_totem;
+pub use update_totem::*;

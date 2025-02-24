@@ -7,112 +7,99 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import {
-  SettleDisputeArgs,
-  settleDisputeArgsBeet,
-} from '../types/SettleDisputeArgs'
+import { UpdateTotemArgs, updateTotemArgsBeet } from '../types/UpdateTotemArgs'
 
 /**
  * @category Instructions
- * @category SettleDispute
+ * @category UpdateTotem
  * @category generated
  */
-export type SettleDisputeInstructionArgs = {
-  args: SettleDisputeArgs
+export type UpdateTotemInstructionArgs = {
+  args: UpdateTotemArgs
 }
 /**
  * @category Instructions
- * @category SettleDispute
+ * @category UpdateTotem
  * @category generated
  */
-export const settleDisputeStruct = new beet.BeetArgsStruct<
-  SettleDisputeInstructionArgs & {
+export const updateTotemStruct = new beet.FixableBeetArgsStruct<
+  UpdateTotemInstructionArgs & {
     instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['args', settleDisputeArgsBeet],
+    ['args', updateTotemArgsBeet],
   ],
-  'SettleDisputeInstructionArgs'
+  'UpdateTotemInstructionArgs'
 )
 /**
- * Accounts required by the _settleDispute_ instruction
+ * Accounts required by the _updateTotem_ instruction
  *
- * @property [_writable_, **signer**] signer
- * @property [_writable_] totem
- * @property [_writable_] dispute
- * @property [] proposal (optional)
- * @property [_writable_] statement
- * @property [] totemDao
+ * @property [**signer**] signer
+ * @property [] totem
+ * @property [_writable_] totemDao
+ * @property [] treasury
+ * @property [] autocratProgram
  * @category Instructions
- * @category SettleDispute
+ * @category UpdateTotem
  * @category generated
  */
-export type SettleDisputeInstructionAccounts = {
+export type UpdateTotemInstructionAccounts = {
   signer: web3.PublicKey
   totem: web3.PublicKey
-  dispute: web3.PublicKey
-  proposal?: web3.PublicKey
-  statement: web3.PublicKey
   totemDao: web3.PublicKey
+  treasury: web3.PublicKey
+  autocratProgram: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const settleDisputeInstructionDiscriminator = [
-  155, 147, 5, 44, 20, 204, 146, 43,
+export const updateTotemInstructionDiscriminator = [
+  166, 131, 156, 151, 211, 78, 172, 105,
 ]
 
 /**
- * Creates a _SettleDispute_ instruction.
- *
- * Optional accounts that are not provided default to the program ID since
- * this was indicated in the IDL from which this instruction was generated.
+ * Creates a _UpdateTotem_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
  * @category Instructions
- * @category SettleDispute
+ * @category UpdateTotem
  * @category generated
  */
-export function createSettleDisputeInstruction(
-  accounts: SettleDisputeInstructionAccounts,
-  args: SettleDisputeInstructionArgs,
+export function createUpdateTotemInstruction(
+  accounts: UpdateTotemInstructionAccounts,
+  args: UpdateTotemInstructionArgs,
   programId = new web3.PublicKey('totAWMiimTLs7yTLAfWtJMmtNKmT5xpU6YM8vAYoqZ5')
 ) {
-  const [data] = settleDisputeStruct.serialize({
-    instructionDiscriminator: settleDisputeInstructionDiscriminator,
+  const [data] = updateTotemStruct.serialize({
+    instructionDiscriminator: updateTotemInstructionDiscriminator,
     ...args,
   })
   const keys: web3.AccountMeta[] = [
     {
       pubkey: accounts.signer,
-      isWritable: true,
+      isWritable: false,
       isSigner: true,
     },
     {
       pubkey: accounts.totem,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.dispute,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.proposal ?? programId,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: accounts.statement,
+      pubkey: accounts.totemDao,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.totemDao,
+      pubkey: accounts.treasury,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.autocratProgram,
       isWritable: false,
       isSigner: false,
     },

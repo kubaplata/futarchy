@@ -77,7 +77,7 @@ export const initializeTotemInstructionDiscriminator = [
 export function createInitializeTotemInstruction(
   accounts: InitializeTotemInstructionAccounts,
   args: InitializeTotemInstructionArgs,
-  programId = new web3.PublicKey('ttmtyv2RyZoWJ1Dvg54XLJJmayFbhJEZzo7WJxMBZy7')
+  programId = new web3.PublicKey('totAWMiimTLs7yTLAfWtJMmtNKmT5xpU6YM8vAYoqZ5')
 ) {
   const [data] = initializeTotemStruct.serialize({
     instructionDiscriminator: initializeTotemInstructionDiscriminator,

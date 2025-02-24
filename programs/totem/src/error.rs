@@ -31,4 +31,7 @@ pub enum TotemError {
 
     #[msg("Statement cannot be settled before ending challenge period")]
     ChallengePeriodNotEnded,
+
+    #[msg("Invalid treasury account")]
+    InvalidTreasury,
 }

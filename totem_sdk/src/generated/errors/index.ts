@@ -171,6 +171,121 @@ createErrorFromNameLookup.set(
 )
 
 /**
+ * ProposalNotFinalised: 'Proposal cannot be settled before finalisation.'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class ProposalNotFinalisedError extends Error {
+  readonly code: number = 0x1776
+  readonly name: string = 'ProposalNotFinalised'
+  constructor() {
+    super('Proposal cannot be settled before finalisation.')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, ProposalNotFinalisedError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1776, () => new ProposalNotFinalisedError())
+createErrorFromNameLookup.set(
+  'ProposalNotFinalised',
+  () => new ProposalNotFinalisedError()
+)
+
+/**
+ * DisputeSettled: 'Dispute has been already settled.'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class DisputeSettledError extends Error {
+  readonly code: number = 0x1777
+  readonly name: string = 'DisputeSettled'
+  constructor() {
+    super('Dispute has been already settled.')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, DisputeSettledError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1777, () => new DisputeSettledError())
+createErrorFromNameLookup.set('DisputeSettled', () => new DisputeSettledError())
+
+/**
+ * InstructionMissingProposal: 'Instruction is missing a proposal account.'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class InstructionMissingProposalError extends Error {
+  readonly code: number = 0x1778
+  readonly name: string = 'InstructionMissingProposal'
+  constructor() {
+    super('Instruction is missing a proposal account.')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, InstructionMissingProposalError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(
+  0x1778,
+  () => new InstructionMissingProposalError()
+)
+createErrorFromNameLookup.set(
+  'InstructionMissingProposal',
+  () => new InstructionMissingProposalError()
+)
+
+/**
+ * ChallengePeriodNotEnded: 'Statement cannot be settled before ending challenge period'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class ChallengePeriodNotEndedError extends Error {
+  readonly code: number = 0x1779
+  readonly name: string = 'ChallengePeriodNotEnded'
+  constructor() {
+    super('Statement cannot be settled before ending challenge period')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, ChallengePeriodNotEndedError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1779, () => new ChallengePeriodNotEndedError())
+createErrorFromNameLookup.set(
+  'ChallengePeriodNotEnded',
+  () => new ChallengePeriodNotEndedError()
+)
+
+/**
+ * InvalidTreasury: 'Invalid treasury account'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class InvalidTreasuryError extends Error {
+  readonly code: number = 0x177a
+  readonly name: string = 'InvalidTreasury'
+  constructor() {
+    super('Invalid treasury account')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, InvalidTreasuryError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x177a, () => new InvalidTreasuryError())
+createErrorFromNameLookup.set(
+  'InvalidTreasury',
+  () => new InvalidTreasuryError()
+)
+
+/**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors
  * @category generated
