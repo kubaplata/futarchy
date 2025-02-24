@@ -626,8 +626,8 @@ export class AutocratClient {
       dao,
       baseVault,
       quoteVault,
-      passLpUserAccount: getAssociatedTokenAddressSync(passLp, proposer),
-      failLpUserAccount: getAssociatedTokenAddressSync(failLp, proposer),
+      passLpUserAccount: getAssociatedTokenAddressSync(passLp, proposer, true),
+      failLpUserAccount: getAssociatedTokenAddressSync(failLp, proposer, true),
       passLpVaultAccount: getAssociatedTokenAddressSync(
         passLp,
         daoTreasury,
