@@ -92,7 +92,7 @@ export class Totem implements TotemArgs {
    */
   static gpaBuilder(
     programId: web3.PublicKey = new web3.PublicKey(
-      'ttmtyv2RyZoWJ1Dvg54XLJJmayFbhJEZzo7WJxMBZy7'
+      'totAWMiimTLs7yTLAfWtJMmtNKmT5xpU6YM8vAYoqZ5'
     )
   ) {
     return beetSolana.GpaBuilder.fromStruct(programId, totemBeet)
