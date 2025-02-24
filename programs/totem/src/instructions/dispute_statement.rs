@@ -3,11 +3,13 @@ use amm::program::Amm as AmmProgram;
 use amm::state::Amm;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::instruction::Instruction;
+use anchor_lang::solana_program::lamports;
+use anchor_lang::solana_program::nonce::state;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{
     self, Mint, TokenAccount
 };
-use anchor_lang::solana_program::program::invoke;
+use anchor_lang::solana_program::program::{invoke, invoke_signed};
 use anchor_lang::InstructionData;
 use anchor_spl::token::Token;
 use anchor_spl::token_2022::spl_token_2022::solana_zk_token_sdk::curve25519::scalar::Zeroable;
@@ -30,10 +32,16 @@ use amm::accounts::CreateAmm as CreateAmmAccounts;
 use conditional_vault::instruction::InitializeQuestion as InitializeQuestionInstructionData;
 use conditional_vault::accounts::InitializeQuestion as InitializeQuestionAccounts;
 use conditional_vault::state::ConditionalVault;
+use crate::error::TotemError;
+use anchor_lang::system_program::{
+    transfer,
+    Transfer
+};
 
 #[derive(AnchorDeserialize, AnchorSerialize)]
 pub struct DisputeStatementArgs {
     pub statement: u64,
+    pub nonce: u64,
     pub description_url: String,
     pub twap_initial_observation: u128,
     pub twap_max_observation_change_per_update: u128,
@@ -45,11 +53,13 @@ pub fn dispute_statement(
 ) -> Result<()> {
     let DisputeStatementArgs {
         description_url,
+        nonce,
         statement: statement_id,
-        twap_initial_observation,
-        twap_max_observation_change_per_update
+        twap_initial_observation: _,
+        twap_max_observation_change_per_update: __
     } = args;
 
+    let signer = &ctx.accounts.signer;
     let totem_dao = &ctx.accounts.totem_dao;
     let statement = &mut ctx.accounts.statement;
     let totem = &mut ctx.accounts.totem;
@@ -69,13 +79,29 @@ pub fn dispute_statement(
     let fail_lp_vault_account = &ctx.accounts.fail_lp_vault_account;
     let pass_lp_vault_account = &ctx.accounts.pass_lp_vault_account;
     let autocrat_program = &ctx.accounts.autocrat_program;
+    let proposer = &ctx.accounts.proposer;
 
-    let create_amm_instruction_data = CreateAmmInstructionData {
-        args: CreateAmmArgs {
-            twap_initial_observation,
-            twap_max_observation_change_per_update
-        }
-    };
+    let clock = Clock::get()?;
+
+    require!(
+        statement.created_at + totem.slots_per_challenge_period > clock.slot,
+        TotemError::ChallengePeriodEnded
+    );
+
+    let rent = Rent::get()?;
+    let lamports = rent
+        .minimum_balance(2000);
+
+    transfer(
+        CpiContext::new(
+            system_program.to_account_info(), 
+            Transfer {
+                from: signer.to_account_info(),
+                to: proposer.to_account_info(),
+            }
+        ), 
+        lamports
+    )?;
 
     let inner_instruction_data = SettleDisputeInstructionData {
         args: SettleDisputeArgs {
@@ -85,11 +111,11 @@ pub fn dispute_statement(
 
     let inner_instruction_accounts = SettleDisputeAccounts {
         dispute: dispute.key(),
-        signer: Pubkey::zeroed(), // this should be settlement authority
+        signer: totem_dao.treasury.key(), // this should be settlement authority
         totem: totem.key(),
         statement: statement.key(),
         totem_dao: totem_dao.key(),
-        source_of_truth: Pubkey::zeroed(),
+        proposal: Some(proposal.key()),
     };
 
     let inner_instruction = ProposalInstruction {
@@ -111,7 +137,7 @@ pub fn dispute_statement(
             description_url,
             fail_lp_tokens_to_lock: 0,
             instruction: inner_instruction,
-            nonce: totem.total_disputes,
+            nonce,
             pass_lp_tokens_to_lock: 0
         }
     };
@@ -130,21 +156,32 @@ pub fn dispute_statement(
         pass_lp_mint: pass_lp_mint.key(),
         pass_lp_user_account: pass_lp_user_account.key(),
         pass_lp_vault_account: pass_lp_vault_account.key(),
-        proposer: totem.key(),
+        proposer: proposer.key(),
         question: question.key(),
         quote_vault: quote_vault.key()
     };
 
+    let metas = instruction_accounts
+        .to_account_metas(None)
+        .iter()
+        .map(|acc| AccountMeta { is_signer: acc.is_signer || acc.pubkey == proposer.key(), is_writable: acc.is_writable, pubkey: acc.pubkey })
+        .collect();
+
     let instruction = Instruction::new_with_bytes(
         autocrat_program.key(), 
         &InitializeProposalInstructionData::data(&instruction_data),
-        instruction_accounts.to_account_metas(None)
+        metas
     );
 
-    invoke(
+    let signer_seeds = &[
+        PROPOSER_SEED.as_bytes(),
+        &[ctx.bumps.proposer]
+    ];
+
+    invoke_signed(
         &instruction, 
         &[
-            totem.to_account_info(),
+            proposer.to_account_info(),
             token_program.to_account_info(),
             system_program.to_account_info(),
             totem_dao.to_account_info(),
@@ -160,10 +197,13 @@ pub fn dispute_statement(
             pass_lp_vault_account.to_account_info(),
             quote_vault.to_account_info(),
             question.to_account_info(),
-        ]
+        ],
+        &[signer_seeds]
     )?;
 
+    statement.status = Status::Disputed;
     statement.disputes += 1;
+    dispute.proposal = proposal.key();
     totem.total_disputes += 1;
 
     Ok(())
@@ -205,22 +245,33 @@ pub struct DisputeStatement<'info> {
     pub statement: Account<'info, Statement>,
 
     #[account(
-        mut,
+        init,
+        payer = signer,
         seeds = [
             // One dispute per statement, not sure if should allow more
             DISPUTE_SEED.as_bytes(),
             statement.key().as_ref()
         ],
-        bump
+        bump,
+        space = Dispute::SIZE
     )]
     pub dispute: Account<'info, Dispute>,
 
     /// CHECK: Rely on MetaDAO security
-    #[account()]
+    #[account(
+        mut
+    )]
     pub proposal: AccountInfo<'info>,
 
-    #[account()]
-    pub amm: Account<'info, Amm>,
+    /// CHECK: its ok
+    #[account(
+        mut,
+        seeds = [
+            PROPOSER_SEED.as_bytes()
+        ],
+        bump
+    )]
+    pub proposer: AccountInfo<'info>,
 
     #[account()]
     pub question: Account<'info, Question>,
@@ -235,45 +286,25 @@ pub struct DisputeStatement<'info> {
     pub fail_amm: Account<'info, Amm>,
 
     #[account()]
-    pub pass_lp_mint: Account<'info, Mint>,
-
-    #[account(
-        init,
-        payer = signer,
-        associated_token::mint = pass_lp_mint,
-        associated_token::authority = dispute,
-    )]
-    pub pass_lp_user_account: Account<'info, TokenAccount>,
+    pub pass_lp_mint: Box<Account<'info, Mint>>,
 
     #[account()]
-    pub fail_lp_mint: Account<'info, Mint>,
-
-    #[account(
-        init,
-        payer = signer,
-        associated_token::mint = fail_lp_mint,
-        associated_token::authority = dispute,
-    )]
-    pub fail_lp_user_account: Account<'info, TokenAccount>,
-
-    #[account(
-        init,
-        payer = signer,
-        associated_token::mint = pass_lp_mint,
-        associated_token::authority = totem_dao
-    )]
-    pub pass_lp_vault_account: Account<'info, TokenAccount>,
-
-    #[account(
-        init,
-        payer = signer,
-        associated_token::mint = fail_lp_mint,
-        associated_token::authority = totem_dao
-    )]
-    pub fail_lp_vault_account: Account<'info, TokenAccount>,
+    pub pass_lp_user_account: Box<Account<'info, TokenAccount>>,
 
     #[account()]
-    pub quote_vault: Account<'info, ConditionalVault>,
+    pub fail_lp_mint: Box<Account<'info, Mint>>,
+
+    #[account()]
+    pub fail_lp_user_account: Box<Account<'info, TokenAccount>>,
+
+    #[account()]
+    pub pass_lp_vault_account: Box<Account<'info, TokenAccount>>,
+
+    #[account()]
+    pub fail_lp_vault_account: Box<Account<'info, TokenAccount>>,
+
+    #[account()]
+    pub quote_vault: Box<Account<'info, ConditionalVault>>,
 
     #[account()]
     pub autocrat_program: Program<'info, Autocrat>,

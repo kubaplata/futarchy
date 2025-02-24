@@ -159,6 +159,7 @@ export class AutocratClient {
   } {
     let vaultProgramId = this.vaultClient.vaultProgram.programId;
     const [question] = getQuestionAddr(
+
       vaultProgramId,
       sha256(`Will ${proposal} pass?/FAIL/PASS`),
       proposal,

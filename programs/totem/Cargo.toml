@@ -18,6 +18,6 @@ default = []
 [dependencies]
 anchor-lang = "0.29.0"
 anchor-spl = "0.29.0"
-autocrat = { path = "../autocrat" }
+autocrat = { path = "../autocrat", features = [ "cpi" ] }
 amm = { path = "../amm", features = [ "cpi" ] }
 conditional_vault = { path = "../conditional_vault", features = [ "cpi" ] }

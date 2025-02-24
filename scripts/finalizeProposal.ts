@@ -8,6 +8,7 @@ let autocratClient: AutocratClient = AutocratClient.createClient({
   provider: anchor.AnchorProvider.env(),
 });
 
+
 // const PROPOSAL_NUMBER = 3;
 const proposal = new PublicKey("Dssb1oTTqKjWJTe8QVrStFXxcMZfd7LTSpTRbuHuNdnW");
 

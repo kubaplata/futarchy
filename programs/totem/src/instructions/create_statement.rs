@@ -14,12 +14,16 @@ pub fn create_statement(
     let totem = &mut ctx.accounts.totem;
     let statement = &mut ctx.accounts.statement;
 
+    let clock = Clock::get()?;
+    let slot = clock.slot;
+
     statement.statement = args.statement;
     statement.creator = signer.key();
     statement.index = totem.statements;
     statement.status = Status::Proposed;
     statement.disputes = 0;
-
+    statement.created_at = slot;
+    
     totem.statements += 1;
 
     Ok(())
