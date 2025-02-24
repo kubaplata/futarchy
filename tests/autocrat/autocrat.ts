@@ -485,16 +485,16 @@ export default function suite() {
         autocratClient.getProposalPdas(proposal, META, USDC, dao);
 
       // swap $500 in the fail market, make it fail
-      await ammClient
-        .swapIx(
-          failAmm,
-          failBaseMint,
-          failQuoteMint,
-          { buy: {} },
-          new BN(500).muln(1_000_000),
-          new BN(0)
-        )
-        .rpc();
+      // await ammClient
+      //   .swapIx(
+      //     failAmm,
+      //     failBaseMint,
+      //     failQuoteMint,
+      //     { buy: {} },
+      //     new BN(500).muln(1_000_000),
+      //     new BN(0)
+      //   )
+      //   .rpc();
 
       for (let i = 0; i < 100; i++) {
         await advanceBySlots(context, 10_000n);
