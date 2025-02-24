@@ -515,11 +515,18 @@ async function proposeStatement() {
 }
 
 async function passProposal() {
+    const {
+        statements
+    } = await Totem
+        .fromAccountAddress(
+            autocratClient.provider.connection,
+            totem
+        );
 
     const [statement] = PublicKey.findProgramAddressSync(
         [
             Buffer.from("statement"),
-            new BN(0).toArrayLike(Buffer, "le", 8)
+            new BN(statements).subn(1).toArrayLike(Buffer, "le", 8)
         ],
         TOTEM_PROGRAM_ID
     );
@@ -626,6 +633,24 @@ async function passProposal() {
             skipPreflight: true
         });
 
+    const tx2 = await autocratClient
+        .ammClient
+        .swapIx(
+            failAmm,
+            baseMint,
+            quoteMint,
+            { buy: {} },
+            new BN(100).muln(1_000_000),
+            new BN(0)
+        )
+        .preInstructions([
+            ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 200_000 }),
+        ])
+        .rpc({
+            skipPreflight: true
+        });
+
+    console.log(tx2);
     return tx;
 }
 
@@ -715,10 +740,24 @@ async function passProposal() {
 })();
 
 // (async () => {
+//     console.log(
+//         await passProposal()
+//     );
+// })();
+
+// (async () => {
+//     const {
+//         statements
+//     } = await Totem.fromAccountAddress(
+//         autocratClient.provider.connection,
+//         totem
+//
+//     );
+//
 //     const [statement] = PublicKey.findProgramAddressSync(
 //         [
 //             Buffer.from("statement"),
-//             new BN(0).toArrayLike(Buffer, "le", 8)
+//             new BN(statements).subn(1).toArrayLike(Buffer, "le", 8)
 //         ],
 //         TOTEM_PROGRAM_ID
 //     );
@@ -805,16 +844,75 @@ async function passProposal() {
 //     console.log(tx);
 // })();
 
-// (async () => {
-//     console.log(
-//         await passProposal()
-//     );
-// })();
-
 (async () => {
-    const
-    autocratClient
-        .finalizeProposalIx(
-
-        )
+    console.log(
+        await passProposal()
+    );
 })();
+
+// (async () => {
+//     const {
+//         dao,
+//         statements
+//     } = await Totem.fromAccountAddress(
+//         autocratClient.provider.connection,
+//         totem
+//     );
+//
+//     const [statement] = PublicKey
+//         .findProgramAddressSync(
+//             [
+//                 Buffer.from("statement"),
+//                 new BN(statements).subn(1).toArrayLike(Buffer, "le", 8)
+//             ],
+//             TOTEM_PROGRAM_ID
+//         );
+//
+//     const [dispute] = PublicKey
+//         .findProgramAddressSync(
+//             [
+//                 Buffer.from("dispute"),
+//                 statement.toBuffer()
+//             ],
+//             TOTEM_PROGRAM_ID
+//         );
+//
+//     const {
+//         proposal
+//     } = await Dispute
+//         .fromAccountAddress(
+//             autocratClient.provider.connection,
+//             dispute
+//         );
+//
+//     const {
+//         tokenMint,
+//         usdcMint
+//     } = await autocratClient
+//         .getDao(dao);
+//
+//     const {
+//         passAmm,
+//         failAmm
+//     } = await autocratClient
+//         .getProposal(proposal);
+//
+//     await autocratClient
+//         .ammClient
+//         .crankThatTwap(passAmm);
+//
+//     await autocratClient
+//         .ammClient
+//         .crankThatTwap(failAmm);
+//
+//     const txId = await autocratClient
+//         .finalizeProposal(proposal);
+//         // .preInstructions([
+//         //     ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 200_000 }),
+//         // ])
+//         // .rpc({
+//         //     skipPreflight: true
+//         // });
+//
+//     console.log(txId);
+// })();

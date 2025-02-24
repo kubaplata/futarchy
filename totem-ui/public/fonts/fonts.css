@@ -1,0 +1,57 @@
+@font-face {
+    src: url("./nohemi/Nohemi Thin.woff");
+    font-family: "Nohemi";
+    font-weight: 100;
+}
+
+@font-face {
+    src: url("./nohemi/Nohemi ExtraLight.woff");
+    font-family: "Nohemi";
+    font-weight: 200;
+}
+
+@font-face {
+    src: url("./nohemi/Nohemi Light.woff");
+    font-family: "Nohemi";
+    font-weight: 300;
+}
+
+@font-face {
+    src: url("./nohemi/Nohemi Regular.woff");
+    font-family: "Nohemi";
+    font-weight: 400;
+}
+
+@font-face {
+    src: url("./nohemi/Nohemi Medium.woff");
+    font-family: "Nohemi";
+    font-weight: 500;
+}
+
+@font-face {
+    src: url("./nohemi/Nohemi SemiBold.woff");
+    font-family: "Nohemi";
+    font-weight: 600;
+}
+
+@font-face {
+    src: url("./nohemi/Nohemi Bold.woff");
+    font-family: "Nohemi";
+    font-weight: 700;
+}
+
+@font-face {
+    src: url("./nohemi/Nohemi ExtraBold.woff");
+    font-family: "Nohemi";
+    font-weight: 800;
+}
+
+@font-face {
+    src: url("./nohemi/Nohemi Black.woff");
+    font-family: "Nohemi";
+    font-weight: 900;
+}
+
+.nohemi {
+    font-family: "Nohemi", sans-serif;
+}
