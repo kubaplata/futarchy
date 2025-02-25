@@ -71,7 +71,7 @@ export const createStatementInstructionDiscriminator = [
 export function createCreateStatementInstruction(
   accounts: CreateStatementInstructionAccounts,
   args: CreateStatementInstructionArgs,
-  programId = new web3.PublicKey('totAWMiimTLs7yTLAfWtJMmtNKmT5xpU6YM8vAYoqZ5')
+  programId = new web3.PublicKey('totoRorVC1BCmAMFvxM55t9RjPMsGeTTVdUgGC9AF8g')
 ) {
   const [data] = createStatementStruct.serialize({
     instructionDiscriminator: createStatementInstructionDiscriminator,

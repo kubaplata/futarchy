@@ -9,7 +9,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("totAWMiimTLs7yTLAfWtJMmtNKmT5xpU6YM8vAYoqZ5");
+declare_id!("totoRorVC1BCmAMFvxM55t9RjPMsGeTTVdUgGC9AF8g");
 
 #[program]
 pub mod totem {

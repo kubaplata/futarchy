@@ -10,7 +10,7 @@ autocrat = "autoQP9RmUNkzzKRXsMkWicDVZ3h29vvyMDcAYjCxxg"
 autocrat_migrator = "MigRDW6uxyNMDBD8fX2njCRyJC4YZk2Rx9pDUZiAESt"
 conditional_vault = "VLTX1ishMBbcX3rdBWGssxawAo1Q2X2qxYFYqiGodVg"
 optimistic_timelock = "tiME1hz9F5C5ZecbvE5z6Msjy8PKfTqo1UuRYXfndKF"
-totem = "totAWMiimTLs7yTLAfWtJMmtNKmT5xpU6YM8vAYoqZ5"
+totem = "totoRorVC1BCmAMFvxM55t9RjPMsGeTTVdUgGC9AF8g"
 
 [registry]
 url = "https://api.apr.dev"

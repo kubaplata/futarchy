@@ -1,7 +1,7 @@
 import {ComputeBudgetProgram, Keypair, SystemProgram, TransactionMessage} from "@solana/web3.js";
 import {createMint} from "@solana/spl-token";
 import {createInitializeTotemInstruction, PROGRAM_ID as TOTEM_PROGRAM_ID} from "../../totem_sdk/src/generated";
-import {AUTOCRAT_PROGRAM_ID} from "@metadaoproject/futarchy/v0.4";
+import {AUTOCRAT_PROGRAM_ID, PriceMath} from "@metadaoproject/futarchy/v0.4";
 import BN from "bn.js";
 import signAndSendTransaction from "./signAndSendTransaction";
 import { autocratClient, keypair, totem, totemDao } from "./index";
@@ -30,6 +30,13 @@ export async function createTotemDao() {
     console.log(`Created mints. Base: ${mint.toString()}, USDC: ${usdc.toString()}`);
 
     console.log(`Creating totemDAO`);
+
+    const scaledPrice = PriceMath.getAmmPrice(
+        1000,
+        6,
+        6
+    );
+
     const ix = createInitializeTotemInstruction(
         {
             totem,
@@ -48,7 +55,7 @@ export async function createTotemDao() {
                 minBaseFutarchicLiquidity: new BN(0),
                 minQuoteFutarchicLiquidity: new BN(0),
                 twapInitialObservation: new BN(0),
-                twapMaxObservationChangePerUpdate: new BN(1000 * Math.pow(10, 6))
+                twapMaxObservationChangePerUpdate: scaledPrice.divn(50)
             }
         },
         TOTEM_PROGRAM_ID

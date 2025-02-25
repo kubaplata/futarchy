@@ -23,9 +23,6 @@ import {
 } from "@solana/spl-token";
 import signAndSendTransaction from "./signAndSendTransaction.js";
 import bs58 from "bs58";
-import {sha256} from "@noble/hashes/sha256";
-import createLookupTables from "./createLookupTables.js";
-import {autocratProgram} from "../main";
 import {createTotemDao} from "./createTotemDao";
 import proposeStatement from "./proposeStatement";
 import disputeStatement from "./disputeStatement";
@@ -34,6 +31,7 @@ import passDispute from "./passDispute";
 import crankProposal from "./crankProposal";
 import finaliseProposal from "./finaliseProposal";
 import settleDispute from "./settleDispute";
+import getDispute from "./getDispute";
 
 const keypair = Keypair.fromSecretKey(
     Uint8Array.from(
@@ -95,10 +93,19 @@ async function testFullFlow() {
     await sleep(10);
 
     await crankProposal();
+    await sleep(10);
 
     await finaliseProposal();
+    await sleep(10);
 
     await settleDispute();
+    const statementStatus = await getDispute();
+    console.log(
+        statementStatus.__kind,
+        statementStatus.__kind === "Settled"
+            ? "as " + statementStatus.fields[0]
+            : null
+    );
 }
 
 (async () => {
