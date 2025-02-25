@@ -7,7 +7,7 @@ const binaryInstallDir = path.join(__dirname, '.crates');
 module.exports = {
     idlGenerator: 'anchor',
     programName: 'totem',
-    programId: 'totAWMiimTLs7yTLAfWtJMmtNKmT5xpU6YM8vAYoqZ5',
+    programId: 'totoRorVC1BCmAMFvxM55t9RjPMsGeTTVdUgGC9AF8g',
     idlDir,
     sdkDir,
     binaryInstallDir,

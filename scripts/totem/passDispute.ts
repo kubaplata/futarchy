@@ -101,7 +101,7 @@ export default async function passDispute() {
             baseMint,
             quoteMint,
             { buy: {} },
-            new BN(15000).muln(1_000_000),
+            new BN(15_000).muln(1_000_000),
             new BN(0)
         )
         .preInstructions([
