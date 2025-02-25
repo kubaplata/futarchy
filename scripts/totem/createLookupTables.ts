@@ -7,10 +7,11 @@ import {
     Connection,
     Keypair
 } from "@solana/web3.js";
+import {AnchorProvider} from "@coral-xyz/anchor";
 
 export default async function createLookupTables(
     connection: Connection,
-    signer: Keypair,
+    signer: AnchorProvider,
     addresses: PublicKey[]
 ) {
     const {
@@ -39,8 +40,8 @@ export default async function createLookupTables(
         recentBlockhash: blockhash
     }).compileToV0Message();
 
-    const transaction = new VersionedTransaction(message);
-    transaction.sign([signer]);
+    let transaction = new VersionedTransaction(message);
+    transaction = await signer.wallet.signTransaction(transaction);
     const signature = await connection.sendRawTransaction(transaction.serialize());
 
     await connection.confirmTransaction({
