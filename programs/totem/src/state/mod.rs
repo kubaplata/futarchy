@@ -6,3 +6,6 @@ pub use totem::*;
 
 pub mod dispute;
 pub use dispute::*;
+
+pub mod request;
+pub use request::*;

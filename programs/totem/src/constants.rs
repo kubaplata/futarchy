@@ -16,4 +16,10 @@ pub const DISPUTE_SEED: &str = "dispute";
 pub const PROPOSER_SEED: &str = "proposer";
 
 #[constant]
+pub const REQUEST_SEED: &str = "request";
+
+#[constant]
+pub const FEE_COLLECTOR_SEED: &str = "fee_collector";
+
+#[constant]
 pub const DEFAULT_SLOTS_PER_CHALLENGE_PERIOD: u64 = 24 * 60 * 6 * 25;
