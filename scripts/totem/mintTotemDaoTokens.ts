@@ -43,14 +43,14 @@ export default async function mintTotemDaoTokens() {
         tokenMint,
         baseAta,
         keypair.publicKey,
-        30_000 * Math.pow(10, 6)
+        300_000 * Math.pow(10, 6)
     );
 
     const ix2 = createMintToInstruction(
         usdcMint,
         usdcAta,
         keypair.publicKey,
-        30_000 * Math.pow(10, 6)
+        300_000 * Math.pow(10, 6)
     );
 
     console.log("Minting DAO tokens.");

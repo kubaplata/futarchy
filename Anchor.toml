@@ -32,6 +32,7 @@ reclaim-tokens = "yarn run ts-node scripts/reclaimTokens.ts"
 send-tokens = "yarn run ts-node scripts/sendTokens.ts"
 setup-devnet = "yarn run tsx scripts/setupDevnet.ts"
 test = "npx mocha --import=tsx tests/main.test.ts"
+test-totem="npx mocha --import=tsx tests/totem/main.test.ts"
 
 [test]
 startup_wait = 5000

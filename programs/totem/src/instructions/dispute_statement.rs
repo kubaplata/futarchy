@@ -111,7 +111,7 @@ pub fn dispute_statement(
 
     let inner_instruction_accounts = SettleDisputeAccounts {
         dispute: dispute.key(),
-        signer: totem_dao.treasury.key(), // this should be settlement authority
+        signer: totem_dao.treasury.key(),
         totem: totem.key(),
         statement: statement.key(),
         totem_dao: totem_dao.key(),
@@ -204,6 +204,7 @@ pub fn dispute_statement(
     statement.status = Status::Disputed;
     statement.disputes += 1;
     dispute.proposal = proposal.key();
+    dispute.statement = statement.key();
     totem.total_disputes += 1;
 
     Ok(())

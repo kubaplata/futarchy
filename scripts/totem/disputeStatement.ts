@@ -75,7 +75,7 @@ export default async function disputeStatement() {
     console.log("Creating lookup table.");
     const lookupTable = await createLookupTables(
         autocratClient.provider.connection,
-        keypair,
+        autocratClient.provider,
         [
             baseVault,
             quoteVault,
