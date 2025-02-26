@@ -77,8 +77,8 @@ function sleep(s: number) {
 }
 
 async function testFullFlow() {
-    await createTotemDao();
-    await sleep(10);
+    // await createTotemDao();
+    // await sleep(10);
 
     await mintTotemDaoTokens();
     await sleep(10);

@@ -204,6 +204,7 @@ pub fn dispute_statement(
     statement.status = Status::Disputed;
     statement.disputes += 1;
     dispute.proposal = proposal.key();
+    dispute.statement = statement.key();
     totem.total_disputes += 1;
 
     Ok(())

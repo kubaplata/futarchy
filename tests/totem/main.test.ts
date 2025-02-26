@@ -24,16 +24,18 @@ import {
     getProposalAddr, getQuestionAddr,
     InstructionUtils,
     PriceMath,
-    AUTOCRAT_PROGRAM_ID
+    AUTOCRAT_PROGRAM_ID, sleep
 } from "@metadaoproject/futarchy/v0.4";
 import {BN} from "bn.js";
 import exp from "node:constants";
 import {expect} from "chai";
 import createLookupTables from "../../scripts/totem/createLookupTables";
 import {sha256} from "@noble/hashes/sha256";
+import {autocratClient, totem, totemDao} from "../../scripts/totem";
+import {Dispute, PROGRAM_ID as TOTEM_PROGRAM_ID} from "../../totem_sdk/src/generated";
 
 describe("totem", function () {
-    this.timeout(60_000);
+    this.timeout(7 * 60_000); // 7 minutes, because im a retard and set proposal time to 1000 slots
 
     const provider = anchor.AnchorProvider.env();
     anchor.setProvider(provider);
@@ -106,6 +108,7 @@ describe("totem", function () {
         const message = new TransactionMessage({
             payerKey: provider.publicKey,
             instructions: [
+                ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 200_000 }),
                 tokenAccountInstruction,
                 tokenInstruction,
                 usdcAccountInstruction,
@@ -289,7 +292,7 @@ describe("totem", function () {
 
         let transaction = new VersionedTransaction(message);
         transaction = await provider.wallet.signTransaction(transaction);
-        await provider.sendAndConfirm(transaction);
+        const tx = await provider.sendAndConfirm(transaction);
     });
 
     it('Disputes a statement', async () => {
@@ -383,14 +386,16 @@ describe("totem", function () {
                 proposal,
                 2
             )
+            .preInstructions([
+                ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 200_000 }),
+            ])
             .rpc();
 
         const vaultUsdcMintIx = autocratClient
             .vaultClient
             .initializeVaultIx(question, usdcMint, 2);
 
-
-        const ammBaseIx= autocratClient
+        const ammBaseIx = autocratClient
             .ammClient
             .initializeAmmIx(
                 passBaseMint,
@@ -408,29 +413,38 @@ describe("totem", function () {
                 twapMaxObservationChangePerUpdate
             );
 
-        const vaultTokenMintIx = autocratClient
-            .vaultClient
-            .initializeVaultIx(question, tokenMint, 2);
-
         const instructions = await InstructionUtils.getInstructions(
-            vaultTokenMintIx,
             vaultUsdcMintIx,
             ammBaseIx,
             ammQuoteIx
         );
 
+        const vaultTokenMintIx = autocratClient
+            .vaultClient
+            .initializeVaultIx(question, tokenMint, 2);
+
+        // wait for lookup table?
+        await sleep(10_000);
+        const lookupTableData = await provider.connection.getAddressLookupTable(lookupTable);
         const { blockhash } = await provider.connection.getLatestBlockhash();
         const message = new TransactionMessage({
             recentBlockhash: blockhash,
-            instructions,
+            instructions: [
+                // questionIx,
+                ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 50_000 }),
+                ...(await InstructionUtils.getInstructions(
+                    vaultTokenMintIx
+                )),
+                ...instructions,
+            ],
             payerKey: provider.publicKey
         }).compileToV0Message(
-            [(await provider.connection.getAddressLookupTable(lookupTable)).value]
+            [lookupTableData.value]
         );
 
         let transaction = new VersionedTransaction(message);
         transaction = await provider.wallet.signTransaction(transaction);
-        await provider.sendAndConfirm(transaction);
+        const tx = await provider.connection.sendRawTransaction(transaction.serialize());
 
         const failLpVaultAccount = getAssociatedTokenAddressSync(
             failLpMint,
@@ -459,6 +473,36 @@ describe("totem", function () {
         const baseTokensToLP = new BN(1000 * Math.pow(10, 6));
         const quoteTokensToLP = new BN(1000 * Math.pow(10, 6));
 
+        await sleep(10_000);
+
+        const initPassLpVaultAccount = createAssociatedTokenAccountIdempotentInstruction(
+            provider.publicKey,
+            passLpVaultAccount,
+            treasury,
+            passLpMint
+        );
+
+        const initPassLpUserAccount = createAssociatedTokenAccountIdempotentInstruction(
+            provider.publicKey,
+            passLpUserAccount,
+            proposer,
+            passLpMint
+        );
+
+        const initFailLpUserAccount = createAssociatedTokenAccountIdempotentInstruction(
+            provider.publicKey,
+            failLpUserAccount,
+            proposer,
+            failLpMint
+        );
+
+        const initFailLpVaultAccount = createAssociatedTokenAccountIdempotentInstruction(
+            provider.publicKey,
+            failLpVaultAccount,
+            treasury,
+            failLpMint
+        );
+
         await autocratClient.vaultClient
             .splitTokensIx(
                 question,
@@ -467,6 +511,9 @@ describe("totem", function () {
                 baseTokensToLP,
                 2
             )
+            .preInstructions([
+                ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 200_000 }),
+            ])
             .postInstructions(
                 await InstructionUtils.getInstructions(
                     autocratClient.vaultClient.splitTokensIx(
@@ -478,7 +525,8 @@ describe("totem", function () {
                     )
                 )
             )
-            .rpc();
+            .rpc({ skipPreflight: true });
+
 
         await autocratClient.ammClient
             .addLiquidityIx(
@@ -489,6 +537,9 @@ describe("totem", function () {
                 baseTokensToLP,
                 new BN(0)
             )
+            .preInstructions([
+                ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 200_000 }),
+            ])
             .postInstructions(
                 await InstructionUtils.getInstructions(
                     autocratClient.ammClient.addLiquidityIx(
@@ -502,34 +553,6 @@ describe("totem", function () {
                 )
             )
             .rpc();
-
-        const initPassLpVaultAccount = createAssociatedTokenAccountInstruction(
-            provider.publicKey,
-            passLpVaultAccount,
-            treasury,
-            passLpMint
-        );
-
-        const initPassLpUserAccount = createAssociatedTokenAccountInstruction(
-            provider.publicKey,
-            passLpUserAccount,
-            proposer,
-            passLpMint
-        );
-
-        const initFailLpUserAccount = createAssociatedTokenAccountInstruction(
-            provider.publicKey,
-            failLpUserAccount,
-            proposer,
-            failLpMint
-        );
-
-        const initFailLpVaultAccount = createAssociatedTokenAccountInstruction(
-            provider.publicKey,
-            failLpVaultAccount,
-            treasury,
-            failLpMint
-        );
 
         await program
             .methods
@@ -565,12 +588,30 @@ describe("totem", function () {
                 totemDao,
             })
             .preInstructions([
+                ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 200_000 }),
                 initFailLpUserAccount,
                 initFailLpVaultAccount,
                 initPassLpUserAccount,
                 initPassLpVaultAccount,
             ])
             .rpc();
+
+        await sleep(10000);
+
+        const {
+            proposal: setProposal,
+            statement: setStatement,
+            index,
+        } = await program
+            .account
+            .dispute
+            .fetch(dispute);
+
+        startSlot = await provider.connection.getSlot();
+
+        expect(proposal.toString()).eq(setProposal.toString());
+        expect(setStatement.toString()).eq(statement.toString());
+        expect(index.toNumber()).eq(0);
     });
 
     it('Passes the dispute.', async () => {
@@ -585,7 +626,7 @@ describe("totem", function () {
             .findProgramAddressSync(
                 [
                     Buffer.from("statement"),
-                    statements.toArrayLike(Buffer, "le", 8)
+                    statements.subn(1).toArrayLike(Buffer, "le", 8)
                 ],
                 program.programId
             );
@@ -639,6 +680,9 @@ describe("totem", function () {
                 2,
                 provider.publicKey
             )
+            .preInstructions([
+                ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 200_000 }),
+            ])
             .rpc();
 
         await autocratClient
@@ -651,6 +695,207 @@ describe("totem", function () {
                 new BN(15_000).muln(1_000_000),
                 new BN(0)
             )
+            .preInstructions([
+                ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 200_000 })
+            ])
             .rpc();
+    });
+
+    it("Cranks until the ending slot (eta 7min lmfao)", async () => {
+        const {
+            dao,
+            statements
+        } = await program
+            .account
+            .totem
+            .fetch(totem);
+
+        const [statement] = PublicKey
+            .findProgramAddressSync(
+                [
+                    Buffer.from("statement"),
+                    new BN(statements).subn(1).toArrayLike(Buffer, "le", 8)
+                ],
+                TOTEM_PROGRAM_ID
+            );
+
+        const [dispute] = PublicKey
+            .findProgramAddressSync(
+                [
+                    Buffer.from("dispute"),
+                    statement.toBuffer()
+                ],
+                TOTEM_PROGRAM_ID
+            );
+
+        const {
+            proposal
+        } = await Dispute
+            .fromAccountAddress(
+                autocratClient.provider.connection,
+                dispute
+            );
+
+        const {
+            tokenMint,
+            usdcMint,
+            treasury
+        } = await autocratClient
+            .getDao(dao);
+
+        const [derivedTreasury] = PublicKey
+            .findProgramAddressSync(
+                [
+                    dao.toBuffer()
+                ],
+                AUTOCRAT_PROGRAM_ID
+            );
+
+        const {
+            passAmm,
+            failAmm
+        } = await autocratClient
+            .getProposal(proposal);
+
+        let currentSlot = await provider.connection.getSlot();
+
+        while (currentSlot < startSlot + 1000) {
+            console.log(`crankingThatTwap: ${ startSlot + 1000 - currentSlot } slots left`);
+            await sleep(30_000);
+
+            const tx0 = await autocratClient
+                .ammClient
+                .crankThatTwap(passAmm);
+
+            const tx1 = await autocratClient
+                .ammClient
+                .crankThatTwap(failAmm);
+
+            currentSlot = await provider.connection.getSlot();
+        }
+    });
+
+    it('Finalizes proposal.', async () => {
+        const {
+            statements
+        } = await program
+            .account
+            .totem
+            .fetch(totem);
+
+        const [statement] = PublicKey
+            .findProgramAddressSync(
+                [
+                    Buffer.from("statement"),
+                    new BN(statements).subn(1).toArrayLike(Buffer, "le", 8)
+                ],
+                TOTEM_PROGRAM_ID
+            );
+
+        const [dispute] = PublicKey
+            .findProgramAddressSync(
+                [
+                    Buffer.from("dispute"),
+                    statement.toBuffer()
+                ],
+                TOTEM_PROGRAM_ID
+            );
+
+        const {
+            proposal,
+        } = await program
+            .account
+            .dispute
+            .fetch(dispute);
+
+        const {
+            failAmm,
+            passAmm,
+        } = await autocratClient
+            .getProposal(proposal);
+
+        const passAmmData = await autocratClient
+            .ammClient
+            .getAmm(passAmm);
+
+        let slotsPassedPassAmm = (passAmmData.oracle.lastUpdatedSlot.sub(passAmmData.createdAtSlot));
+        let twapPassAmm = passAmmData.oracle.aggregator.div(slotsPassedPassAmm);
+
+        const failAmmData = await autocratClient
+            .ammClient
+            .getAmm(failAmm);
+
+        let slotsPassedFailAmm = (failAmmData.oracle.lastUpdatedSlot.sub(failAmmData.createdAtSlot));
+        let twapFailAmm = failAmmData.oracle.aggregator.div(slotsPassedFailAmm);
+
+        const {
+            passThresholdBps
+        } = await autocratClient
+            .getDao(totemDao);
+
+        const daoPassThresholdBps = passThresholdBps;
+        const MAX_BPS = 10_000;
+        const threshold = twapFailAmm
+            .mul(new BN(MAX_BPS).add(new BN(daoPassThresholdBps)))
+            .div(new BN(MAX_BPS));
+
+        console.log({
+            threshold: threshold.toString(),
+            twapFailAmm: twapFailAmm.toString(),
+            twapPassAmm: twapPassAmm.toString(),
+            passOverThreshold: twapPassAmm.gt(threshold)
+        });
+
+        await autocratClient
+            .finalizeProposal(proposal);
+    });
+
+    it("Settles the dispute.", async () => {
+        const {
+            statements
+        } = await program
+            .account
+            .totem
+            .fetch(totem);
+
+        const [statement] = PublicKey
+            .findProgramAddressSync(
+                [
+                    Buffer.from("statement"),
+                    new BN(statements).subn(1).toArrayLike(Buffer, "le", 8)
+                ],
+                TOTEM_PROGRAM_ID
+            );
+
+        const [dispute] = PublicKey
+            .findProgramAddressSync(
+                [
+                    Buffer.from("dispute"),
+                    statement.toBuffer()
+                ],
+                TOTEM_PROGRAM_ID
+            );
+
+        const {
+            proposal
+        } = await Dispute
+            .fromAccountAddress(
+                autocratClient.provider.connection,
+                dispute
+            );
+
+        await autocratClient
+            .executeProposal(proposal);
+
+        const {
+            status
+        } = await program
+            .account
+            .statement
+            .fetch(statement);
+
+        expect(status.disputed).eq(undefined);
+        expect(status.proposed).eq(undefined);
+        expect(status.settled).not.eq(undefined);
     });
 });
