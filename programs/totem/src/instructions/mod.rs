@@ -15,3 +15,6 @@ pub use settle_dispute::*;
 
 pub mod update_totem;
 pub use update_totem::*;
+
+pub mod request_statement;
+pub use request_statement::*;
