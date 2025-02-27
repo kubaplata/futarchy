@@ -1,5 +1,5 @@
 # Totem Futarchy
-https://totem-futarchy.vercel.app/
+https://totem.wtf/
 
 Optimistic futarchy-governed everything oracle.
 
