@@ -34,4 +34,8 @@ pub mod totem {
     pub fn update_totem(ctx: Context<UpdateTotem>, args: UpdateTotemArgs) -> Result<()> {
         instructions::update_totem(ctx, args)
     }
+
+    pub fn request_statement(ctx: Context<RequestStatement>, args: RequestStatementArgs) -> Result<()> {
+        instructions::request_statement(ctx, args)
+    }
 }

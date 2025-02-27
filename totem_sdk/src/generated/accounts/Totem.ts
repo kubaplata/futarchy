@@ -19,6 +19,7 @@ export type TotemArgs = {
   slotsPerChallengePeriod: beet.bignum
   admin: web3.PublicKey
   statements: beet.bignum
+  requests: beet.bignum
   totalDisputes: beet.bignum
 }
 
@@ -36,6 +37,7 @@ export class Totem implements TotemArgs {
     readonly slotsPerChallengePeriod: beet.bignum,
     readonly admin: web3.PublicKey,
     readonly statements: beet.bignum,
+    readonly requests: beet.bignum,
     readonly totalDisputes: beet.bignum
   ) {}
 
@@ -48,6 +50,7 @@ export class Totem implements TotemArgs {
       args.slotsPerChallengePeriod,
       args.admin,
       args.statements,
+      args.requests,
       args.totalDisputes
     )
   }
@@ -179,6 +182,17 @@ export class Totem implements TotemArgs {
         }
         return x
       })(),
+      requests: (() => {
+        const x = <{ toNumber: () => number }>this.requests
+        if (typeof x.toNumber === 'function') {
+          try {
+            return x.toNumber()
+          } catch (_) {
+            return x
+          }
+        }
+        return x
+      })(),
       totalDisputes: (() => {
         const x = <{ toNumber: () => number }>this.totalDisputes
         if (typeof x.toNumber === 'function') {
@@ -210,6 +224,7 @@ export const totemBeet = new beet.BeetStruct<
     ['slotsPerChallengePeriod', beet.u64],
     ['admin', beetSolana.publicKey],
     ['statements', beet.u64],
+    ['requests', beet.u64],
     ['totalDisputes', beet.u64],
   ],
   Totem.fromArgs,

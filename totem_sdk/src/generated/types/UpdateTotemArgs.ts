@@ -7,6 +7,7 @@
 
 import * as beet from '@metaplex-foundation/beet'
 export type UpdateTotemArgs = {
+  nonce: beet.bignum
   slotsPerProposal: beet.COption<beet.bignum>
   minBaseFutarchicLiquidity: beet.COption<beet.bignum>
   minQuoteFutarchicLiquidity: beet.COption<beet.bignum>
@@ -23,6 +24,7 @@ export type UpdateTotemArgs = {
 export const updateTotemArgsBeet =
   new beet.FixableBeetArgsStruct<UpdateTotemArgs>(
     [
+      ['nonce', beet.u64],
       ['slotsPerProposal', beet.coption(beet.u64)],
       ['minBaseFutarchicLiquidity', beet.coption(beet.u64)],
       ['minQuoteFutarchicLiquidity', beet.coption(beet.u64)],

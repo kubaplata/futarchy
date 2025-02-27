@@ -5,6 +5,7 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
+import * as splToken from '@solana/spl-token'
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
 import { UpdateTotemArgs, updateTotemArgsBeet } from '../types/UpdateTotemArgs'
@@ -40,7 +41,21 @@ export const updateTotemStruct = new beet.FixableBeetArgsStruct<
  * @property [] totem
  * @property [_writable_] totemDao
  * @property [] treasury
+ * @property [_writable_] proposal
+ * @property [_writable_] proposer
+ * @property [] question
+ * @property [] baseVault
+ * @property [] passAmm
+ * @property [] failAmm
+ * @property [] passLpMint
+ * @property [] passLpUserAccount
+ * @property [] failLpMint
+ * @property [] failLpUserAccount
+ * @property [] passLpVaultAccount
+ * @property [] failLpVaultAccount
+ * @property [] quoteVault
  * @property [] autocratProgram
+ * @property [] associatedTokenProgram
  * @category Instructions
  * @category UpdateTotem
  * @category generated
@@ -50,7 +65,23 @@ export type UpdateTotemInstructionAccounts = {
   totem: web3.PublicKey
   totemDao: web3.PublicKey
   treasury: web3.PublicKey
+  proposal: web3.PublicKey
+  proposer: web3.PublicKey
+  question: web3.PublicKey
+  baseVault: web3.PublicKey
+  passAmm: web3.PublicKey
+  failAmm: web3.PublicKey
+  passLpMint: web3.PublicKey
+  passLpUserAccount: web3.PublicKey
+  failLpMint: web3.PublicKey
+  failLpUserAccount: web3.PublicKey
+  passLpVaultAccount: web3.PublicKey
+  failLpVaultAccount: web3.PublicKey
+  quoteVault: web3.PublicKey
   autocratProgram: web3.PublicKey
+  tokenProgram?: web3.PublicKey
+  associatedTokenProgram: web3.PublicKey
+  systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
@@ -99,7 +130,87 @@ export function createUpdateTotemInstruction(
       isSigner: false,
     },
     {
+      pubkey: accounts.proposal,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.proposer,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.question,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.baseVault,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.passAmm,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.failAmm,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.passLpMint,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.passLpUserAccount,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.failLpMint,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.failLpUserAccount,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.passLpVaultAccount,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.failLpVaultAccount,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.quoteVault,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
       pubkey: accounts.autocratProgram,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.tokenProgram ?? splToken.TOKEN_PROGRAM_ID,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.associatedTokenProgram,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.systemProgram ?? web3.SystemProgram.programId,
       isWritable: false,
       isSigner: false,
     },

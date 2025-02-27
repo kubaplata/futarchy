@@ -28,6 +28,16 @@
       "value": "\"proposer\""
     },
     {
+      "name": "REQUEST_SEED",
+      "type": "string",
+      "value": "\"request\""
+    },
+    {
+      "name": "FEE_COLLECTOR_SEED",
+      "type": "string",
+      "value": "\"fee_collector\""
+    },
+    {
       "name": "DEFAULT_SLOTS_PER_CHALLENGE_PERIOD",
       "type": "u64",
       "value": "24 * 60 * 6 * 25"
@@ -306,7 +316,87 @@
           "isSigner": false
         },
         {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proposer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "question",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "baseVault",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "passAmm",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "failAmm",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "passLpMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "passLpUserAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "failLpMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "failLpUserAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "passLpVaultAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "failLpVaultAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "quoteVault",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "autocratProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
           "isMut": false,
           "isSigner": false
         }
@@ -316,6 +406,44 @@
           "name": "args",
           "type": {
             "defined": "UpdateTotemArgs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "requestStatement",
+      "accounts": [
+        {
+          "name": "signer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "totem",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "request",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "feeCollector",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "RequestStatementArgs"
           }
         }
       ]
@@ -338,6 +466,28 @@
           {
             "name": "proposal",
             "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Request",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "question",
+            "type": "string"
+          },
+          {
+            "name": "creator",
+            "type": "publicKey"
+          },
+          {
+            "name": "statement",
+            "type": {
+              "option": "publicKey"
+            }
           }
         ]
       }
@@ -395,6 +545,10 @@
           },
           {
             "name": "statements",
+            "type": "u64"
+          },
+          {
+            "name": "requests",
             "type": "u64"
           },
           {
@@ -517,6 +671,22 @@
       }
     },
     {
+      "name": "RequestStatementArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "question",
+            "type": "string"
+          },
+          {
+            "name": "fee",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "SettleDisputeArgs",
       "type": {
         "kind": "struct",
@@ -533,6 +703,10 @@
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
           {
             "name": "slotsPerProposal",
             "type": {
