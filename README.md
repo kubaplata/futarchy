@@ -13,4 +13,4 @@ it's on mainnet
 
 run ./scripts/totem/index.ts
 
-actual tests 🔜🔜🔜🔜🔜🔜
+`anchor run test-totem` also hits mainnet
